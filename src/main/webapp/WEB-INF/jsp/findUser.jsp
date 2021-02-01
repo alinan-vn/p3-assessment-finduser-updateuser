@@ -10,7 +10,7 @@
 		<h1>Login!</h1>
 		<form action='' method='POST'>
 			<p>ID</p>
-			<input name='name' type='text' />
+			<input name='id' type='text' />
 			<br />
 			<input type='submit' />
 		</form>
