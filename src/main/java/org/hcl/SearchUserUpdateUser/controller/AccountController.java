@@ -18,29 +18,49 @@ public class AccountController {
 	@Autowired
 	UserEntityCrudRepository userEntityCrudRepository;
 
-	@GetMapping(path = "/createAccount")
-	public String CreateAccountGet(Model model) {
-		
-		UserEntity newUser = new UserEntity();
-		model.addAttribute("newUser", newUser);
-		return "createAccount";
+	@GetMapping(path = "/login")
+	public String LoginGet(Model model) {
+	
+		UserEntity userData = new UserEntity();
+		model.addAttribute("userData", userData);	
+		return "login";
 	}
 	
-	@PostMapping(path = "/createAccount")
-	public void CreateAccountPost(@ModelAttribute("userFormData") UserEntity userEntity, BindingResult result) {
-
-		System.out.println("==== ACCOUNTCONTROLLER - CreateAccount");
-		System.out.println("==== Form Data: ");
-		System.out.println("==== Username: " + userEntity.getName());
-		System.out.println("==== Password: " + userEntity.getPassword());
-						
-		if (userEntity == null || userEntity.getName() == null) {
+	@PostMapping(path = "/login")
+	public void LoginPost(@ModelAttribute("userFormData") UserEntity userData, BindingResult result) {
+		
+		System.out.println("ACCOUNTCONTROLLER - Login");
+		System.out.println("Form Data: ");
+		System.out.println("Username: " + userData.getName());
+		System.out.println("Password: " + userData.getPassword());
+		
+		if (userData == null || userData.getName() == null) {
 			throw new RuntimeException("Name Required");
 		} 
-		if (userEntity.getPassword() == null) {
+		if (userData.getPassword() == null) {
 			throw new RuntimeException("Password Required");
 		}
-		userEntityCrudRepository.save(userEntity);
+		
+		Boolean userLoginCorrect = false;
+		
+		Iterable<UserEntity> users = userEntityCrudRepository.findAll();
+		for(UserEntity u : users) {
+			System.out.println("CHECKING USERNAMES: " + u.getName() + " vs " + userData.getName());
+			int nameRes = u.getName().compareTo(userData.getName());
+			if (nameRes == 0) {
+				System.out.println("CHECKING PASSWORDS: " + u.getPassword() + " vs " + userData.getPassword());
+				int passwordRes = u.getPassword().compareTo(userData.getPassword());
+				if (passwordRes == 0) {
+					userLoginCorrect = true;
+				}
+			}
+		}
+		
+		if (userLoginCorrect) {
+			System.out.println("++++USER LOGIN SUCCESSFUL++++");
+		} else {
+			System.out.println("----USER LOGIN FALSE----");
+		}
 	}
 	
 	@GetMapping(path = "/allAccounts")
