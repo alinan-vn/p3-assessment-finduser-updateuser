@@ -10,6 +10,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class AccountController {
@@ -40,5 +41,25 @@ public class AccountController {
 			throw new RuntimeException("Password Required");
 		}
 		userEntityCrudRepository.save(userEntity);
+	}
+	
+	@GetMapping(path = "/allAccounts")
+	public String ShowAccounts(@RequestParam(value = "userHtml", defaultValue = "null", required = true) String userHtml, Model model) {
+		Iterable<UserEntity> users = userEntityCrudRepository.findAll();
+		String allUserCodeHtml = "<ul>";
+		
+		for( UserEntity u : users) {
+			allUserCodeHtml += "<li>";
+			allUserCodeHtml += u.getId();
+			allUserCodeHtml += " ==== ";
+			allUserCodeHtml += u.getName();
+			allUserCodeHtml += " === ";
+			allUserCodeHtml += u.getPassword();
+			allUserCodeHtml += "</li>";			
+		}
+		allUserCodeHtml += "</ul>";
+		model.addAttribute("userHtml", allUserCodeHtml);
+
+		return "allAccounts";
 	}
 }
