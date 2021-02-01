@@ -3,18 +3,20 @@
 <html>
 	<head>
 		<meta charset="ISO-8859-1">
-		<title>Find User</title>
+		<title>UPDATE</title>
 	</head>
 
 	<body>
 		<h1>Login!</h1>
 		<form action='' method='POST'>
-			<p>Name</p>
+			<p>update USERNAME, current username is "${name}"</p>
 			<input name='name' type='text' />
 			<br />
-			<p>Password</p>
+			
+			<label>update Password, current password is "${password}"</label>
 			<input name='password' type='text' />
 			<br />
+			
 			<input type='submit' />
 		</form>
 	</body>
