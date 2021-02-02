@@ -7,13 +7,13 @@
 	</head>
 
 	<body>
-		<h1>Login!</h1>
+		<h1>UPDATE USER!</h1>
 		<form action='' method='POST'>
-			<p>update USERNAME, current username is "${name}"</p>
+			<p>update USERNAME</p>
 			<input name='name' type='text' />
 			<br />
 			
-			<label>update Password, current password is "${password}"</label>
+			<label>update Password</label>
 			<input name='password' type='text' />
 			<br />
 			

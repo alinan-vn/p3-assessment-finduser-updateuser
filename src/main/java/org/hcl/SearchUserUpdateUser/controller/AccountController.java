@@ -10,10 +10,14 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class AccountController {
+	
+	Long currentUserId;
+	UserEntity updateUserDataClass;
 
 	@Autowired
 	UserEntityCrudRepository userEntityCrudRepository;
@@ -27,7 +31,7 @@ public class AccountController {
 	}
 	
 	@PostMapping(path = "/login")
-	public void LoginPost(@ModelAttribute("userFormData") UserEntity userData, BindingResult result) {
+	public String LoginPost(@ModelAttribute("userFormData") UserEntity userData, BindingResult result) {
 		
 		System.out.println("ACCOUNTCONTROLLER - Login");
 		System.out.println("Form Data: ");
@@ -51,16 +55,59 @@ public class AccountController {
 				System.out.println("CHECKING PASSWORDS: " + u.getPassword() + " vs " + userData.getPassword());
 				int passwordRes = u.getPassword().compareTo(userData.getPassword());
 				if (passwordRes == 0) {
+					currentUserId = u.getId();
 					userLoginCorrect = true;
+					break;
 				}
 			}
 		}
 		
 		if (userLoginCorrect) {
 			System.out.println("++++USER LOGIN SUCCESSFUL++++");
+			return "redirect:updateUser";
 		} else {
 			System.out.println("----USER LOGIN FALSE----");
+			return "redirect:errorMessage";
 		}
+	}
+	
+	@GetMapping(path = "/updateUser")
+	public String UpdateUserGet(Model model) {
+		
+		System.out.println("Looking at Current: " + currentUserId);
+		
+		UserEntity userUpdateData = new UserEntity();
+		model.addAttribute("userUpdateData", userUpdateData);
+		return "updateUser";
+	}
+	
+	@PostMapping(path = "updateUser")
+	public String updateUserPost(@ModelAttribute("userUpdateData") UserEntity userUpdateData, BindingResult result) {
+		
+		System.out.println("==== ACCOUNTCONTROLLER - CreateAccount");
+		System.out.println("==== Form Data: ");
+		System.out.println("==== Username: " + userUpdateData.getName());
+		System.out.println("==== Password: " + userUpdateData.getPassword());
+		
+		if (userUpdateData == null || userUpdateData.getName() == null) {
+			throw new RuntimeException("Name Required");
+		} 
+		if (userUpdateData.getPassword() == null) {
+			throw new RuntimeException("Password Required");
+		}
+		
+		Iterable<UserEntity> users = userEntityCrudRepository.findAll();
+		for(UserEntity u : users) {
+			if(u.getId().equals(currentUserId)) {
+				System.out.println("FOUDN USER IN UPDATES");
+				u.setName(userUpdateData.getName());
+				u.setPassword(userUpdateData.getPassword());
+				userEntityCrudRepository.save(u);
+				break;
+			}
+		}
+		
+		return "redirect:allAccounts";
 	}
 	
 	@GetMapping(path = "/allAccounts")
@@ -81,5 +128,10 @@ public class AccountController {
 		model.addAttribute("userHtml", allUserCodeHtml);
 
 		return "allAccounts";
+	}
+	
+	@GetMapping(path = "/errorMessage")
+	public String ShowErrorMessage() {
+		return "errorMessage";
 	}
 }
