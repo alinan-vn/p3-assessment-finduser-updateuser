@@ -3,6 +3,9 @@ package org.hcl.SearchUserUpdateUser.controller;
 import org.hcl.SearchUserUpdateUser.crudRepository.UserEntityCrudRepository;
 import org.hcl.SearchUserUpdateUser.entity.UserEntity;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class AccountController {
+	
+	 Logger logger = LoggerFactory.getLogger(AccountController.class);
 	
 	Long currentUserId;
 	UserEntity updateUserDataClass;
@@ -33,15 +38,17 @@ public class AccountController {
 	@PostMapping(path = "/login")
 	public String LoginPost(@ModelAttribute("userFormData") UserEntity userData, BindingResult result) {
 		
-		System.out.println("ACCOUNTCONTROLLER - Login");
-		System.out.println("Form Data: ");
-		System.out.println("Username: " + userData.getName());
-		System.out.println("Password: " + userData.getPassword());
+		logger.info("ACCOUNTCONTROLLER - Login");
+		logger.info("Form Data: ");
+		logger.info("Username: " + userData.getName());
+		logger.info("Password: " + userData.getPassword());
 		
 		if (userData == null || userData.getName() == null) {
+			logger.debug("Name Required");
 			throw new RuntimeException("Name Required");
 		} 
 		if (userData.getPassword() == null) {
+			logger.debug("Password Required");
 			throw new RuntimeException("Password Required");
 		}
 		
@@ -49,10 +56,10 @@ public class AccountController {
 		
 		Iterable<UserEntity> users = userEntityCrudRepository.findAll();
 		for(UserEntity u : users) {
-			System.out.println("CHECKING USERNAMES: " + u.getName() + " vs " + userData.getName());
+			logger.info("CHECKING USERNAMES: " + u.getName() + " vs " + userData.getName());
 			int nameRes = u.getName().compareTo(userData.getName());
 			if (nameRes == 0) {
-				System.out.println("CHECKING PASSWORDS: " + u.getPassword() + " vs " + userData.getPassword());
+				logger.info("CHECKING PASSWORDS: " + u.getPassword() + " vs " + userData.getPassword());
 				int passwordRes = u.getPassword().compareTo(userData.getPassword());
 				if (passwordRes == 0) {
 					currentUserId = u.getId();
@@ -63,10 +70,10 @@ public class AccountController {
 		}
 		
 		if (userLoginCorrect) {
-			System.out.println("++++USER LOGIN SUCCESSFUL++++");
+			logger.info("++++USER LOGIN SUCCESSFUL++++");
 			return "redirect:updateUser";
 		} else {
-			System.out.println("----USER LOGIN FALSE----");
+			logger.info("----USER LOGIN FALSE----");
 			return "redirect:errorMessage";
 		}
 	}
@@ -74,7 +81,7 @@ public class AccountController {
 	@GetMapping(path = "/updateUser")
 	public String UpdateUserGet(Model model) {
 		
-		System.out.println("Looking at Current: " + currentUserId);
+		logger.info("Looking at Current: " + currentUserId);
 		
 		UserEntity userUpdateData = new UserEntity();
 		model.addAttribute("userUpdateData", userUpdateData);
@@ -84,22 +91,24 @@ public class AccountController {
 	@PostMapping(path = "updateUser")
 	public String updateUserPost(@ModelAttribute("userUpdateData") UserEntity userUpdateData, BindingResult result) {
 		
-		System.out.println("==== ACCOUNTCONTROLLER - CreateAccount");
-		System.out.println("==== Form Data: ");
-		System.out.println("==== Username: " + userUpdateData.getName());
-		System.out.println("==== Password: " + userUpdateData.getPassword());
+		logger.info("==== ACCOUNTCONTROLLER - UpdateAccount");
+		logger.info("==== Form Data: ");
+		logger.info("==== Username: " + userUpdateData.getName());
+		logger.info("==== Password: " + userUpdateData.getPassword());
 		
 		if (userUpdateData == null || userUpdateData.getName() == null) {
+			logger.debug("Name Required");
 			throw new RuntimeException("Name Required");
 		} 
 		if (userUpdateData.getPassword() == null) {
+			logger.debug("Password Required");
 			throw new RuntimeException("Password Required");
 		}
 		
 		Iterable<UserEntity> users = userEntityCrudRepository.findAll();
 		for(UserEntity u : users) {
 			if(u.getId().equals(currentUserId)) {
-				System.out.println("FOUDN USER IN UPDATES");
+				logger.info("FOUND USER IN UPDATES");
 				u.setName(userUpdateData.getName());
 				u.setPassword(userUpdateData.getPassword());
 				userEntityCrudRepository.save(u);
